@@ -25,7 +25,7 @@ def receive_messages(queue_name: str) -> list:
     response = client.get_queue_url(QueueName=queue_name)
     queue_url = response["QueueUrl"]
 
-    # Получаем сообщения
+    # get messagese here
     response = client.receive_message(
         QueueUrl=queue_url,
         MaxNumberOfMessages=10,
@@ -67,13 +67,13 @@ def send_message_to_queue(queue_name: str = None, message_body: str = None,  mes
 def receive_and_process_messages(queue_name: str) -> int:
     client = session_local.client("sqs")
 
-    # 1. Получаем URL очереди
+    # 1. gettin url of queue
     queue_response = client.get_queue_url(
         QueueName=queue_name
     )
     queue_url = queue_response["QueueUrl"]
 
-    # 2. Получаем до 10 сообщений
+    # 2. getting 10 messages
     response = client.receive_message(
         QueueUrl=queue_url,
         MaxNumberOfMessages=10,
@@ -84,7 +84,7 @@ def receive_and_process_messages(queue_name: str) -> int:
     messages = response.get("Messages", [])
     processed_count = 0
 
-    # 3. Обрабатываем каждое сообщение .. in future we will save do db 
+    # 3. proces each message...  in future i will implement some training with db 
     for message in messages:
         try:
             body = json.loads(message["Body"])
@@ -93,10 +93,9 @@ def receive_and_process_messages(queue_name: str) -> int:
             print("Product:", body["product"])
             print("Price:", body["price"])
 
-            # Здесь может быть твоя бизнес-логика:
-            # сохранение заказа в БД, вызов API и т.д.
-
-            # 4. Удаляем успешно обработанное сообщение
+            # here i will add some bis. logic
+            # as example saves somethibg to db... 
+            # 4. delete messages which is processed 
             client.delete_message(
                 QueueUrl=queue_url,
                 ReceiptHandle=message["ReceiptHandle"]
@@ -107,7 +106,7 @@ def receive_and_process_messages(queue_name: str) -> int:
 
         except Exception as error:
             print(f"Processing failed: {error}")
-            # Не удаляем сообщение при ошибке обработки
+        
 
     return processed_count
 
